@@ -9,6 +9,6 @@ Sensor libraries are taken from Pycom repository: https://github.com/pycom/pycom
 
 Before uploading the code to a Pycom node, please remember to remove the ``img`` directory (which contains images for this README, but should not be uploaded to the node).
 
-**Example of messages shown through the serial port**
+**Example of messages shown through the serial port (FiPy with a PySense expansion board)**
 
 <img src="https://github.com/jorgenavarroortiz/PYCOM-measurements-LoRaWAN/raw/main/img/pycom-lorawan-measurements-console.png" width="800">
