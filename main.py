@@ -69,6 +69,8 @@ def zfill(s, width):
 
 # Functions related to board
 def takeMeasurement():
+  global lt_light, lt_lux, mp_temp, mp_alt, mp_pres, si_temp, si_humid, si_dew, si_humid_tamb, li_acc, li_roll, li_pitch
+
   if boardType == Pycoproc.PYSCAN or boardType == Pycoproc.PYSENSE:
     lt = LTR329ALS01(pyexp)
     lt_light = lt.light()
@@ -81,11 +83,11 @@ def takeMeasurement():
     mp = MPL3115A2(pyexp,mode=ALTITUDE) # Returns height in meters. Mode may also be set to PRESSURE, returning a value in Pascals
     mp_temp = mp.temperature()
     mp_alt = mp.altitude()
-    print("[INFO] MPL3115A2 temperature:                                " + str(mp_temp))
-    print("[INFO] MPL3115A2 altitude:                                   " + str(mp_alt))
+    print("[INFO] MPL3115A2 temperature:                                 " + str(mp_temp))
+    print("[INFO] MPL3115A2 altitude:                                    " + str(mp_alt))
     mpp = MPL3115A2(pyexp,mode=PRESSURE) # Returns pressure in Pa. Mode may also be set to ALTITUDE, returning a value in meters
     mp_pres = mpp.pressure()
-    print("[INFO] MPL3115A2 Pressure:                                   " + str(mp_pres))
+    print("[INFO] MPL3115A2 Pressure:                                    " + str(mp_pres))
 
     si = SI7006A20(pyexp)
     si_temp = si.temperature()
@@ -93,18 +95,18 @@ def takeMeasurement():
     si_dew = si.dew_point()
     t_ambient = 24.4
     si_humid_tamb = si.humid_ambient(t_ambient)
-    print("[INFO] SI7006A20 temperature:                                " + str(si_temp)+ " deg C")
-    print("[INFO] SI7006A20 relative Humidity:                          " + str(si_humid) + " %RH")
-    print("[INFO] SI7006A20 dew point:                                  "+ str(si_dew) + " deg C")
-    print("[INFO] SI7006A20 humidity ambient for " + str(t_ambient) + " deg C:            " + str(si_humid_tamb) + "%RH")
+    print("[INFO] SI7006A20 temperature:                                 " + str(si_temp)+ " deg C")
+    print("[INFO] SI7006A20 relative Humidity:                           " + str(si_humid) + " %RH")
+    print("[INFO] SI7006A20 dew point:                                   "+ str(si_dew) + " deg C")
+    print("[INFO] SI7006A20 humidity ambient for " + str(t_ambient) + " deg C:             " + str(si_humid_tamb) + " %RH")
 
     li = LIS2HH12(pyexp)
     li_acc = li.acceleration()
     li_roll = li.roll()
     li_pitch = li.pitch()
-    print("[INFO] LIS2HH12 acceleration:                                " + str(li_acc))
-    print("[INFO] LIS2HH12 roll:                                        " + str(li_roll))
-    print("[INFO] LIS2HH12 pitch:                                       " + str(li_pitch))
+    print("[INFO] LIS2HH12 acceleration:                                 " + str(li_acc))
+    print("[INFO] LIS2HH12 roll:                                         " + str(li_roll))
+    print("[INFO] LIS2HH12 pitch:                                        " + str(li_pitch))
 
 def detectBoard(lora):
   print("[INFO] Detected board:", sys.platform)
@@ -177,18 +179,34 @@ def initializeLoRaWAN():
   s.setsockopt(socket.SOL_LORA, socket.SO_CONFIRMED, False)
 
   return s
-
+lt_light = None
+lt_lux = None
+mp_temp = None
+mp_alt = None
+mp_pres = None
+si_temp = None
+si_dew = None
+si_humid = None
+si_humid_tamb = None
+li_acc = None
+li_roll = None
+li_pitch = None
 def generateMessage(messageCounter):
-  if (messageCounter < 10):
-    message = "Testing data....." + str(messageCounter)
-  elif (messageCounter < 100):
-    message = "Testing data...." + str(messageCounter)
-  elif (messageCounter < 1000):
-    message = "Testing data..." + str(messageCounter)
-  elif (messageCounter < 10000):
-    message = "Testing data.." + str(messageCounter)
+  if boardType == Pycoproc.PYSENSE:
+    message = "{:.2f} {:.2f} {:.2f} {:.2f}".format(lt_lux, si_temp, si_humid, mp_pres)
+  elif boardType == Pycoproc.PYSCAN:
+    message = "{:.2f}".format(lt_lux)
   else:
-    message = "Testing data." + str(messageCounter)
+    if (messageCounter < 10):
+      message = "Testing data....." + str(messageCounter)
+    elif (messageCounter < 100):
+      message = "Testing data...." + str(messageCounter)
+    elif (messageCounter < 1000):
+      message = "Testing data..." + str(messageCounter)
+    elif (messageCounter < 10000):
+      message = "Testing data.." + str(messageCounter)
+    else:
+      message = "Testing data." + str(messageCounter)
 
   return message
 
