@@ -11,4 +11,4 @@ Before uploading the code to a Pycom node, please remember to remove the ``img``
 
 **Example of messages shown through the serial port (FiPy with a PySense expansion board)**
 
-<img src="https://github.com/jorgenavarroortiz/PYCOM-measurements-LoRaWAN/raw/main/img/pycom-lorawan-measurements-console.png" width="800">
+![pycom-lorawan-measurements-console](https://user-images.githubusercontent.com/17797704/145732311-48e051e7-2728-4f46-a4a1-c0bff8249841.png)
