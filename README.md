@@ -7,8 +7,6 @@ In the case of PySense, it sends lux (LTR329ALS01), temperature (SI7006A20), hum
 
 Sensor libraries are taken from Pycom repository: https://github.com/pycom/pycom-libraries/tree/master/shields/lib
 
-Before uploading the code to a Pycom node, please remember to remove the ``img`` directory (which contains images for this README, but should not be uploaded to the node).
-
 **Example of messages shown through the serial port (FiPy with a PySense expansion board)**
 
 ![pycom-lorawan-measurements-console](https://user-images.githubusercontent.com/17797704/145732311-48e051e7-2728-4f46-a4a1-c0bff8249841.png)
