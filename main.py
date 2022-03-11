@@ -7,6 +7,7 @@ import time
 import ubinascii
 import crypto
 import sys
+import struct
 
 # Libraries from https://github.com/pycom/pycom-libraries/tree/master/shields/lib
 from pycoproc import Pycoproc
