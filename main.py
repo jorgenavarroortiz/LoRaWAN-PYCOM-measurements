@@ -16,6 +16,7 @@ from SI7006A20 import SI7006A20
 from LTR329ALS01 import LTR329ALS01
 from MPL3115A2 import MPL3115A2,ALTITUDE,PRESSURE
 
+bTakeMeasurements = False
 boardType = 0
 
 ## PARAMETERS
@@ -31,14 +32,46 @@ debug = 0
 # -> join (OTAA/ABP))). Set Class-C confirmed downlink timeout to 5 seconds in
 # both cases (chirpstack -> device profile -> class-C)
 # IMPORTANT!!!: for ABP, first activate the device (before starting this program)
-bOTAA = True
-# For OTAA
+bOTAA = False
+# Node information
+#   For OTAA: AppEUI (not used), AppKey
+#   For ABP:  DevAddr, NwkSKey, AppSKey
 AppEUI = '1234567890ABCDEF' # Not used
 AppKey = '00000000000000000000000000000001'
-# For ABP
-DevAddr = '00000001'
+DevAddr = ''
 NwkSKey = '00000000000000000000000000000001'
 AppSKey = '00000000000000000000000000000001'
+devices_list=[{"dev_eui":"70B3D54994DE968F", "tag":"PYCOM01", "no":1, "DevAddr": "00000001"},
+              {"dev_eui":"70B3D54998C0F7E1", "tag":"PYCOM02", "no":2, "DevAddr": "00000002"},
+              {"dev_eui":"70B3D549936647F0", "tag":"PYCOM03", "no":3, "DevAddr": "00000003"},
+              {"dev_eui":"70B3D549950893CB", "tag":"PYCOM04", "no":4, "DevAddr": "00000004"},
+              {"dev_eui":"70B3D5499012E936", "tag":"PYCOM05", "no":5, "DevAddr": "00000005"},
+              {"dev_eui":"70B3D549986901D5", "tag":"PYCOM06", "no":6, "DevAddr": "00000006"},
+              {"dev_eui":"70B3D5499905D7D7", "tag":"PYCOM07", "no":7, "DevAddr": "00000007"},
+              {"dev_eui":"70B3D5499F2B5AC8", "tag":"PYCOM08", "no":8, "DevAddr": "00000008"},
+              {"dev_eui":"70B3D5499FC949D4", "tag":"PYCOM09", "no":9, "DevAddr": "00000009"},
+              {"dev_eui":"70B3D54991CCD2BE", "tag":"PYCOM10", "no":10, "DevAddr": "0000000A"},
+              {"dev_eui":"70B3D54999780ECA", "tag":"PYCOM11", "no":11, "DevAddr": "0000000B"},
+              {"dev_eui":"70B3D5499B75E78B", "tag":"PYCOM12", "no":12, "DevAddr": "0000000C"},
+              {"dev_eui":"70B3D5499BC5EEF1", "tag":"PYCOM13", "no":13, "DevAddr": "0000000D"},
+              {"dev_eui":"70B3D5499471D77D", "tag":"PYCOM14", "no":14, "DevAddr": "0000000E"},
+              {"dev_eui":"70B3D549912AAB8C", "tag":"PYCOM15", "no":15, "DevAddr": "0000000F"},
+              {"dev_eui":"70B3D549965800ED", "tag":"PYCOM16", "no":16, "DevAddr": "00000010"},
+              {"dev_eui":"70B3D5499EE50708", "tag":"PYCOM17", "no":17, "DevAddr": "00000011"},
+              {"dev_eui":"70B3D54993837E4E", "tag":"PYCOM18", "no":18, "DevAddr": "00000012"},
+              {"dev_eui":"70B3D5499B3C5789", "tag":"PYCOM19", "no":19, "DevAddr": "00000013"},
+              {"dev_eui":"70B3D5499D09D44D", "tag":"PYCOM20", "no":20, "DevAddr": "00000014"},
+              {"dev_eui":"70B3D54991D65F2B", "tag":"PYCOM21", "no":21, "DevAddr": "00000015"},
+              {"dev_eui":"70B3D5499E876850", "tag":"PYCOM22", "no":22, "DevAddr": "00000016"},
+              {"dev_eui":"70B3D54991736918", "tag":"PYCOM23", "no":23, "DevAddr": "00000017"},
+              {"dev_eui":"70B3D54997AF1D34", "tag":"PYCOM24", "no":24, "DevAddr": "00000018"},
+              {"dev_eui":"70B3D5499399A57C", "tag":"PYCOM25", "no":25, "DevAddr": "00000019"},
+              {"dev_eui":"70B3D549990DEE6B", "tag":"PYCOM26", "no":26, "DevAddr": "0000001A"},
+              {"dev_eui":"70B3D5499CFA8723", "tag":"PYCOM27", "no":27, "DevAddr": "0000001B"},
+              {"dev_eui":"70B3D54993874264", "tag":"PYCOM28", "no":28, "DevAddr": "0000001C"},
+              {"dev_eui":"70B3D549953CF6C5", "tag":"PYCOM29", "no":29, "DevAddr": "0000001D"},
+              {"dev_eui":"70B3D54998B1C78E", "tag":"PYCOM30", "no":30, "DevAddr": "0000001E"}]
+
 # Retransmission time for JOINREQ
 joinReqRtxTime = 5.0
 
@@ -110,6 +143,8 @@ def takeMeasurement():
     print("[INFO] LIS2HH12 pitch:                                        " + str(li_pitch))
 
 def detectBoard(lora):
+  global DevAddr
+
   print("[INFO] Detected board:", sys.platform)
 
   # Expansion board
@@ -140,12 +175,34 @@ def detectBoard(lora):
   print("[INFO] Wi-Fi MAC:     ", ubinascii.hexlify(WLAN().mac()[0]).upper().decode('utf-8'))
 
   ## LORAWAN MAC address
-  print("[INFO] LORAWAN DevEUI:", ubinascii.hexlify(lora.mac()).upper().decode('utf-8'))
+  DevEUI=ubinascii.hexlify(lora.mac()).upper().decode('utf-8')
+  #print("[INFO] LORAWAN DevEUI:", DevEUI[2:-1])
+  print("[INFO] LORAWAN DevEUI:", DevEUI)
+
+  dev_eui_list = [device["dev_eui"] for device in devices_list]
+  if (debug > 0):
+    print("[DEBUG] dev_eui_list:", dev_eui_list)
+    print("[DEBUG] DevEUI:", DevEUI)
+  if DevEUI in dev_eui_list:
+      DevEUI_index = dev_eui_list.index(DevEUI)
+      deviceNo = devices_list[DevEUI_index]["no"]
+      DevAddr = devices_list[DevEUI_index]["DevAddr"]
+      deviceTag = devices_list[DevEUI_index]["tag"]
+      print("[ERROR] LoRaWAN device found in the database!")
+  else:
+      print("[ERROR] LoRaWAN device not found in the database!")
+
+  if bOTAA:
+    print("[INFO] LORAWAN device " + deviceTag + " (no. " + str(deviceNo) + ") with DevEUI (LSB) 0x" + DevEUI + " will have DevAddr 0x" + DevAddr + ", NwkSKey 0x" + NwkSKey + " and AppSKey 0x" + AppSKey)
+  else:
+    print("[INFO] LORAWAN device " + deviceTag + " (no. " + str(deviceNo) + ") with DevEUI (LSB) 0x" + DevEUI + " will have DevAddr 0x" + DevAddr + " and AppEUI 0x" + AppEUI + " (not used) and AppKey 0x" + AppKey)
 
   return (pyexp, boardType)
 
 # Functions related to LoRaWAN
 def initializeLoRaWAN():
+  global DevAddr
+
   if (bOTAA):
     # Create an OTAA authentication parameters
     app_eui = ubinascii.unhexlify(AppEUI)
@@ -156,9 +213,11 @@ def initializeLoRaWAN():
 
   else:
     # Create an ABP authentication params
+    #dev_addr = ubinascii.unhexlify(DevAddr)
     dev_addr = struct.unpack(">l", ubinascii.unhexlify(DevAddr))[0]
     nwk_swkey = ubinascii.unhexlify(NwkSKey)
     app_swkey = ubinascii.unhexlify(AppSKey)
+    print("DevAddr: 0x" + DevAddr + ", dev_addr: " + str(dev_addr) + ", nwk_swkey: " + str(nwk_swkey) + ", app_swkey: " + str(app_swkey))
 
     # Join a network using ABP (Activation By Personalization)
     lora.join(activation=LoRa.ABP, auth=(dev_addr, nwk_swkey, app_swkey), timeout=0)
@@ -193,11 +252,12 @@ li_acc = None
 li_roll = None
 li_pitch = None
 def generateMessage(messageCounter):
-  if boardType == Pycoproc.PYSENSE:
-    message = "{:.2f} {:.2f} {:.2f} {:.2f}".format(lt_lux, si_temp, si_humid, mp_pres)
-  elif boardType == Pycoproc.PYSCAN:
-    message = "{:.2f}".format(lt_lux)
-  else:
+#  if boardType == Pycoproc.PYSENSE:
+#    message = "{:.2f} {:.2f} {:.2f} {:.2f}".format(lt_lux, si_temp, si_humid, mp_pres)
+#  elif boardType == Pycoproc.PYSCAN:
+#    message = "{:.2f}".format(lt_lux)
+#  else:
+  if True:
     if (messageCounter < 10):
       message = "Testing data....." + str(messageCounter)
     elif (messageCounter < 100):
@@ -232,7 +292,8 @@ messageCounter = 0
 while True:
 
   # Take one measurement
-  takeMeasurement()
+  if bTakeMeasurements:
+    takeMeasurement()
 
   # Generate message
   message = generateMessage (messageCounter) # Testing data.....01, ...
